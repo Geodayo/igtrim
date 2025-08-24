@@ -2,45 +2,53 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Auto Paste & Clean</title>
+  <title>Paste & Clean URL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- important for mobile scaling -->
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 20px;
       display: flex;
       justify-content: center;
-      align-items: center;
-      height: 100vh;
     }
     .container {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 500px; /* not too wide */
+    }
+    h2 {
       text-align: center;
+      font-size: 1.4rem;
+      margin-bottom: 16px;
     }
     input[type="text"] {
-      padding: 8px;
-      width: 360px;
+      width: 100%;
+      padding: 14px;
+      font-size: 1rem;
       border: 1px solid #ccc;
-      border-radius: 5px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      box-sizing: border-box;
     }
     button {
-      margin-top: 12px;
-      padding: 8px 16px;
-      border: none;
+      width: 100%;
+      padding: 14px;
+      font-size: 1rem;
       background: #28a745;
       color: white;
-      border-radius: 5px;
+      border: none;
+      border-radius: 8px;
       cursor: pointer;
     }
-    button:hover {
+    button:active {
       background: #1e7e34;
     }
     p {
-      margin-top: 12px;
-      color: #555;
-      font-size: 0.9em;
+      margin-top: 14px;
+      font-size: 0.95rem;
+      color: #333;
+      text-align: center;
     }
   </style>
 </head>
@@ -48,25 +56,21 @@
   <div class="container">
     <h2>Paste Instagram URL</h2>
     <input type="text" id="urlInput" placeholder="Paste here...">
-    <br>
     <button onclick="pasteFromClipboard()">📋 Paste</button>
     <p id="status"></p>
   </div>
 
   <script>
     async function cleanUrl(pastedText) {
-      // Trim at "/?igsh="
       const cutIndex = pastedText.indexOf("/?igsh=");
       let clean = pastedText;
       if (cutIndex !== -1) {
         clean = pastedText.substring(0, cutIndex);
       }
 
-      // Show in input
       document.getElementById('urlInput').value = clean;
 
       try {
-        // Copy cleaned URL back
         await navigator.clipboard.writeText(clean);
         document.getElementById('status').textContent = "✅ Clean URL copied to clipboard!";
       } catch (err) {
@@ -74,16 +78,16 @@
       }
     }
 
-    // Desktop: Listen for paste events anywhere
+    // Desktop: listen for Ctrl+V
     document.addEventListener("paste", (event) => {
       const pastedText = (event.clipboardData || window.clipboardData).getData("text");
       if (pastedText) {
         cleanUrl(pastedText);
-        event.preventDefault(); // stops raw paste into input
+        event.preventDefault();
       }
     });
 
-    // Mobile: Button handler
+    // Mobile: paste button
     async function pasteFromClipboard() {
       try {
         const text = await navigator.clipboard.readText();
