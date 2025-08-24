@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Auto Paste & Clean</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    input[type="text"] {
+      padding: 8px;
+      width: 360px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      margin-top: 12px;
+      padding: 8px 16px;
+      border: none;
+      background: #28a745;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1e7e34;
+    }
+    p {
+      margin-top: 12px;
+      color: #555;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Paste Instagram URL</h2>
+    <input type="text" id="urlInput" placeholder="Paste here...">
+    <br>
+    <button onclick="pasteFromClipboard()">📋 Paste</button>
+    <p id="status"></p>
+  </div>
+
+  <script>
+    async function cleanUrl(pastedText) {
+      // Trim at "/?igsh="
+      const cutIndex = pastedText.indexOf("/?igsh=");
+      let clean = pastedText;
+      if (cutIndex !== -1) {
+        clean = pastedText.substring(0, cutIndex);
+      }
+
+      // Show in input
+      document.getElementById('urlInput').value = clean;
+
+      try {
+        // Copy cleaned URL back
+        await navigator.clipboard.writeText(clean);
+        document.getElementById('status').textContent = "✅ Clean URL copied to clipboard!";
+      } catch (err) {
+        document.getElementById('status').textContent = "⚠️ Could not copy back to clipboard.";
+      }
+    }
+
+    // Desktop: Listen for paste events anywhere
+    document.addEventListener("paste", (event) => {
+      const pastedText = (event.clipboardData || window.clipboardData).getData("text");
+      if (pastedText) {
+        cleanUrl(pastedText);
+        event.preventDefault(); // stops raw paste into input
+      }
+    });
+
+    // Mobile: Button handler
+    async function pasteFromClipboard() {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) cleanUrl(text);
+      } catch (err) {
+        alert("Clipboard access not allowed: " + err);
+      }
+    }
+  </script>
+</body>
+</html>
