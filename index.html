@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Paste & Clean URL</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- important for mobile scaling -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -15,10 +15,10 @@
     }
     .container {
       width: 100%;
-      max-width: 500px; /* not too wide */
+      max-width: 500px;
+      text-align: center;
     }
     h2 {
-      text-align: center;
       font-size: 1.4rem;
       margin-bottom: 16px;
     }
@@ -31,32 +31,59 @@
       margin-bottom: 12px;
       box-sizing: border-box;
     }
-    button {
-      width: 100%;
+    .result-box {
+      background: white;
       padding: 14px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      word-wrap: break-word;
       font-size: 1rem;
-      background: #28a745;
-      color: white;
+      margin-bottom: 12px;
+    }
+    button {
+      width: 48%;
+      padding: 12px;
+      font-size: 1rem;
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      margin: 4px 1%;
     }
-    button:active {
+    .copy-btn {
+      background: #28a745;
+      color: white;
+    }
+    .copy-btn:active {
       background: #1e7e34;
     }
+    .clear-btn {
+      background: #dc3545;
+      color: white;
+    }
+    .clear-btn:active {
+      background: #a71d2a;
+    }
     p {
-      margin-top: 14px;
-      font-size: 0.95rem;
+      margin-top: 10px;
+      font-size: 0.9rem;
       color: #333;
-      text-align: center;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Paste Instagram URL</h2>
-    <input type="text" id="urlInput" placeholder="Paste here...">
-    <button onclick="pasteFromClipboard()">📋 Paste</button>
+
+    <!-- Input box (visible at start) -->
+    <input type="text" id="urlInput" placeholder="Paste URL here">
+
+    <!-- Result area (hidden at start) -->
+    <div id="resultSection" style="display:none;">
+      <div class="result-box" id="cleanUrl"></div>
+      <button class="copy-btn" onclick="copyAgain()">📋 Copy Again</button>
+      <button class="clear-btn" onclick="clearUrl()">❌ Clear</button>
+    </div>
+
     <p id="status"></p>
   </div>
 
@@ -68,17 +95,41 @@
         clean = pastedText.substring(0, cutIndex);
       }
 
-      document.getElementById('urlInput').value = clean;
+      // Show cleaned URL
+      document.getElementById("cleanUrl").textContent = clean;
+
+      // Hide input, show result section
+      document.getElementById("urlInput").style.display = "none";
+      document.getElementById("resultSection").style.display = "block";
 
       try {
         await navigator.clipboard.writeText(clean);
         document.getElementById('status').textContent = "✅ Clean URL copied to clipboard!";
       } catch (err) {
-        document.getElementById('status').textContent = "⚠️ Could not copy back to clipboard.";
+        document.getElementById('status').textContent = "⚠️ Could not copy to clipboard.";
       }
     }
 
-    // Desktop: listen for Ctrl+V
+    function copyAgain() {
+      const text = document.getElementById("cleanUrl").textContent;
+      navigator.clipboard.writeText(text);
+      document.getElementById("status").textContent = "✅ Copied again!";
+    }
+
+    function clearUrl() {
+      document.getElementById("urlInput").value = "";
+      document.getElementById("urlInput").style.display = "block";
+      document.getElementById("resultSection").style.display = "none";
+      document.getElementById("status").textContent = "";
+    }
+
+    // Mobile/Manual paste: clean when input changes
+    document.getElementById("urlInput").addEventListener("input", (event) => {
+      const text = event.target.value;
+      if (text) cleanUrl(text);
+    });
+
+    // Desktop: support Ctrl+V anywhere
     document.addEventListener("paste", (event) => {
       const pastedText = (event.clipboardData || window.clipboardData).getData("text");
       if (pastedText) {
@@ -86,16 +137,6 @@
         event.preventDefault();
       }
     });
-
-    // Mobile: paste button
-    async function pasteFromClipboard() {
-      try {
-        const text = await navigator.clipboard.readText();
-        if (text) cleanUrl(text);
-      } catch (err) {
-        alert("Clipboard access not allowed: " + err);
-      }
-    }
   </script>
 </body>
 </html>
